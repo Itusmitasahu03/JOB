@@ -1,0 +1,358 @@
+/* ============================================================
+   BOND_DESK - MAIN STYLESHEET
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    font-family: Inter, Arial, sans-serif;
+    color: #172033;
+    background: #f6f8fb;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button,
+input,
+select {
+    font-family: inherit;
+}
+
+/* ============================================================
+   CONTAINER
+   ============================================================ */
+
+.container {
+    width: min(1120px, 92%);
+    margin: auto;
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+nav {
+    min-height: 70px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e8ee;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 4%;
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 23px;
+    font-weight: 800;
+    color: #172033;
+}
+
+.navlinks {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.navlinks a {
+    font-size: 15px;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+.navlinks a:hover {
+    opacity: 0.65;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.hero {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #eef3ff, #ffffff);
+}
+
+.eyebrow,
+.tag {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.eyebrow {
+    text-transform: uppercase;
+}
+
+.hero h1 {
+    font-size: clamp(38px, 6vw, 64px);
+    max-width: 850px;
+    line-height: 1.02;
+    margin: 15px 0;
+}
+
+.hero p,
+.lead {
+    font-size: 18px;
+    line-height: 1.7;
+    max-width: 800px;
+    color: #586174;
+}
+
+/* ============================================================
+   SEARCH BOX
+   ============================================================ */
+
+.searchbox {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.searchbox input,
+.searchbox select,
+.searchbox button {
+    padding: 15px;
+    border: 1px solid #d8dde7;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+.searchbox input {
+    flex: 1;
+    min-width: 190px;
+    background: #ffffff;
+}
+
+.searchbox select {
+    min-width: 170px;
+    background: #ffffff;
+}
+
+.searchbox input:focus,
+.searchbox select:focus {
+    outline: none;
+    border-color: #172033;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.searchbox button,
+.button {
+    background: #172033;
+    color: #ffffff;
+    border: 0;
+    cursor: pointer;
+    padding: 14px 20px;
+    border-radius: 10px;
+    display: inline-block;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.searchbox button:hover,
+.button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.button {
+    white-space: nowrap;
+    height: max-content;
+}
+
+/* ============================================================
+   GENERAL SECTIONS
+   ============================================================ */
+
+.page {
+    padding: 55px 0;
+}
+
+section {
+    padding: 55px 0;
+}
+
+h1 {
+    font-size: 44px;
+}
+
+h2 {
+    font-size: 28px;
+}
+
+p {
+    line-height: 1.6;
+}
+
+/* ============================================================
+   GRID
+   ============================================================ */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e5e8ee;
+    border-radius: 16px;
+    padding: 24px;
+
+    box-shadow: 0 8px 28px rgba(24, 34, 58, 0.04);
+}
+
+.linkcard {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.linkcard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(24, 34, 58, 0.08);
+}
+
+.light {
+    background: #ffffff;
+    padding: 18px;
+    border-radius: 14px;
+}
+
+.info {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+}
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+.status {
+    margin: 24px 0;
+    color: #586174;
+}
+
+/* ============================================================
+   LIST
+   ============================================================ */
+
+.list {
+    display: grid;
+    gap: 16px;
+}
+
+/* ============================================================
+   JOB CARD
+   ============================================================ */
+
+.job {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.job h2 {
+    margin: 8px 0;
+}
+
+.job p {
+    line-height: 1.6;
+    color: #586174;
+}
+
+/* ============================================================
+   TAG
+   ============================================================ */
+
+.tag {
+    display: inline-block;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #edf1f8;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+footer {
+    background: #172033;
+    color: #ffffff;
+    padding: 35px 0;
+    margin-top: 60px;
+}
+
+footer p {
+    opacity: 0.7;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 700px) {
+
+    nav {
+        min-height: auto;
+        padding: 16px 4%;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .navlinks {
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        font-size: 13px;
+    }
+
+    .hero {
+        padding: 55px 0;
+    }
+
+    .hero h1 {
+        font-size: 40px;
+    }
+
+    .job {
+        flex-direction: column;
+    }
+
+    h1 {
+        font-size: 34px;
+    }
+
+    .searchbox {
+        flex-direction: column;
+    }
+
+    .searchbox input,
+    .searchbox select,
+    .searchbox button {
+        width: 100%;
+    }
+}

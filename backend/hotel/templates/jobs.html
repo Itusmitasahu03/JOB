@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Online Jobs, Nearby Jobs, Work From Home | Bond Desk</title>
+
+    <meta name="description"
+        content="Search Bond Desk for online jobs, nearby jobs, work from home, part time jobs and full time jobs by keyword and location.">
+
+    <meta name="robots" content="index,follow">
+
+    <link rel="canonical" href="https://bonddesk.netlify.app/jobs.html">
+{% load static %}
+<link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+
+<nav>
+    <a class="logo" href="/">Bond_Desk</a>
+
+    <div class="navlinks">
+        <a href="/">Home</a>
+        <a href="/spa/?type=Spa%20Centre">Spa Centre</a>
+        <a href="/spa/?type=Massage">Massage</a>
+        <a href="/jobs/">Jobs</a>
+    </div>
+</nav>
+
+
+<main class="container page">
+
+    <h1>
+        Jobs: Online, Nearby, Work From Home, Part Time & Full Time
+    </h1>
+
+    <p class="lead">
+        Search location-wise job listings from the Bond Desk database.
+    </p>
+
+
+    <form id="jobForm" class="searchbox light">
+
+        <input
+            id="jobSearch"
+            type="text"
+            placeholder="Job title, skill or company"
+        >
+
+        <input
+            id="jobLocation"
+            type="text"
+            placeholder="Location"
+        >
+
+        <select id="jobType">
+
+            <option value="">All job types</option>
+
+            <option value="Online Job">Online Job</option>
+
+            <option value="Nearby Job">Nearby Job</option>
+
+            <option value="Work From Home">Work From Home</option>
+
+            <option value="Part Time Job">Part Time Job</option>
+
+            <option value="Full Time Job">Full Time Job</option>
+
+        </select>
+
+        <button type="submit">
+            Search Jobs
+        </button>
+
+    </form>
+
+
+    <div id="status" class="status">
+        Loading jobs...
+    </div>
+
+
+    <div id="jobList" class="list"></div>
+
+</main>
+
+
+<script>
+
+const API_BASE = "";
+
+
+const jobForm = document.getElementById("jobForm");
+const jobSearch = document.getElementById("jobSearch");
+const jobLocation = document.getElementById("jobLocation");
+const jobType = document.getElementById("jobType");
+const status = document.getElementById("status");
+const jobList = document.getElementById("jobList");
+
+
+/* Read values from URL */
+
+const params = new URLSearchParams(
+    window.location.search
+);
+
+jobSearch.value = params.get("search") || "";
+jobLocation.value = params.get("location") || "";
+jobType.value = params.get("type") || "";
+
+
+/* Escape HTML */
+
+function esc(value) {
+
+    return String(value ?? "").replace(
+        /[&<>"']/g,
+        function(character) {
+
+            const entities = {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            };
+
+            return entities[character];
+        }
+    );
+}
+
+
+/* Load jobs */
+
+async function loadJobs() {
+
+    status.textContent = "Loading jobs...";
+    jobList.innerHTML = "";
+
+
+    const query = new URLSearchParams();
+
+
+    if (jobSearch.value.trim()) {
+
+        query.set(
+            "search",
+            jobSearch.value.trim()
+        );
+
+    }
+
+
+    if (jobLocation.value.trim()) {
+
+        query.set(
+            "location",
+            jobLocation.value.trim()
+        );
+
+    }
+
+
+    if (jobType.value) {
+
+        query.set(
+            "type",
+            jobType.value
+        );
+
+    }
+
+
+    const apiUrl =
+        API_BASE +
+        "/api/jobs/?" +
+        query.toString();
+
+
+    console.log("Requesting:", apiUrl);
+
+
+    try {
+
+        const response = await fetch(apiUrl);
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "API returned status " +
+                response.status
+            );
+
+        }
+
+
+        const jobs = await response.json();
+
+
+        if (!Array.isArray(jobs)) {
+
+            throw new Error(
+                "Invalid API response"
+            );
+
+        }
+
+
+        status.textContent =
+            jobs.length +
+            " job listing(s) found.";
+
+
+        if (jobs.length === 0) {
+
+            jobList.innerHTML = `
+                <div class="card">
+
+                    <h2>No jobs found</h2>
+
+                    <p>
+                        Try another keyword,
+                        location or job type.
+                    </p>
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        jobList.innerHTML = jobs.map(function(job) {
+
+            return `
+
+                <article class="job card">
+
+                    <div>
+
+                        <span class="tag">
+                            ${esc(job.job_type)}
+                        </span>
+
+                        <h2>
+                            ${esc(job.title)}
+                        </h2>
+
+                        <p>
+                            <strong>
+                                ${esc(job.company)}
+                            </strong>
+                            ·
+                            ${esc(job.location)}
+                        </p>
+
+                        <p>
+                            ${esc(job.description)}
+                        </p>
+
+                        <p>
+
+                            <b>Work:</b>
+                            ${esc(
+                                job.work_mode ||
+                                "Not specified"
+                            )}
+
+                            &nbsp;&nbsp;
+
+                            <b>Salary:</b>
+                            ${esc(
+                                job.salary ||
+                                "Not specified"
+                            )}
+
+                        </p>
+
+                        <p>
+
+                            <b>Skills:</b>
+                            ${esc(
+                                job.skills ||
+                                "Not specified"
+                            )}
+
+                        </p>
+
+                        <p>
+
+                            <b>Posted:</b>
+                            ${esc(
+                                job.created_at ||
+                                "Not specified"
+                            )}
+
+                        </p>
+
+                    </div>
+
+
+                    ${
+                        job.application_link
+                        ?
+
+                        `
+                        <a
+                            class="button"
+                            href="${esc(job.application_link)}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Apply
+                        </a>
+                        `
+
+                        :
+
+                        ""
+                    }
+
+                </article>
+
+            `;
+
+        }).join("");
+
+    }
+
+
+    catch(error) {
+
+        console.error(
+            "Unable to load jobs:",
+            error
+        );
+
+
+        status.textContent =
+            "Unable to load jobs.";
+
+
+        jobList.innerHTML = `
+
+            <div class="card">
+
+                <h2>
+                    Backend API unavailable
+                </h2>
+
+                <p>
+                    Please make sure Django is running.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* Search */
+
+jobForm.addEventListener(
+    "submit",
+    function(event) {
+
+        event.preventDefault();
+
+        loadJobs();
+
+    }
+);
+
+
+/* Initial loading */
+
+loadJobs();
+
+</script>
+
+</body>
+</html>

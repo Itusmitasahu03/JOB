@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        Spa Centre & Massage Services Near You | Bond Desk
+    </title>
+
+    <meta
+        name="description"
+        content="Search Bond Desk for spa centre and massage service listings by keyword and location."
+    >
+
+    <meta
+        name="robots"
+        content="index,follow"
+    >
+
+    <link
+        rel="canonical"
+        href="https://bonddesk.netlify.app/spa.html"
+    >
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav>
+
+        <a
+            class="logo"
+            href="index.html"
+        >
+            Bond_Desk
+        </a>
+
+
+        <div class="navlinks">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="spa.html">
+                Spa Centre
+            </a>
+
+            <a href="jobs.html">
+                Jobs
+            </a>
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="container page">
+
+
+        <h1>
+            Spa Centre & Massage Services
+        </h1>
+
+
+        <p class="lead">
+            Search service listings by name,
+            service type and location.
+        </p>
+
+
+
+        <!-- ================= SEARCH FORM ================= -->
+
+        <form
+            id="serviceForm"
+            class="searchbox light"
+        >
+
+            <input
+                id="serviceSearch"
+                type="text"
+                placeholder="Spa centre or massage"
+            >
+
+
+            <input
+                id="serviceLocation"
+                type="text"
+                placeholder="Location"
+            >
+
+
+            <select id="serviceType">
+
+                <option value="">
+                    All services
+                </option>
+
+                <option value="Spa Centre">
+                    Spa Centre
+                </option>
+
+                <option value="Massage">
+                    Massage
+                </option>
+
+            </select>
+
+
+            <button type="submit">
+                Search
+            </button>
+
+        </form>
+
+
+
+        <!-- ================= STATUS ================= -->
+
+        <div
+            id="status"
+            class="status"
+        >
+            Loading services...
+        </div>
+
+
+
+        <!-- ================= SERVICE LIST ================= -->
+
+        <div
+            id="serviceList"
+            class="grid"
+        ></div>
+
+
+    </main>
+
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script>
+
+
+        /*
+         * LOCAL DJANGO BACKEND
+         */
+
+        const API_BASE =
+            "http://127.0.0.1:8000";
+
+
+        /*
+         * Get HTML elements
+         */
+
+        const serviceForm =
+            document.getElementById("serviceForm");
+
+        const serviceSearch =
+            document.getElementById("serviceSearch");
+
+        const serviceLocation =
+            document.getElementById("serviceLocation");
+
+        const serviceType =
+            document.getElementById("serviceType");
+
+        const status =
+            document.getElementById("status");
+
+        const serviceList =
+            document.getElementById("serviceList");
+
+
+        /*
+         * Read URL parameters
+         */
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        serviceSearch.value =
+            params.get("search") || "";
+
+
+        serviceLocation.value =
+            params.get("location") || "";
+
+
+        serviceType.value =
+            params.get("type") || "";
+
+
+
+        /*
+         * Escape HTML
+         */
+
+        function esc(value) {
+
+            return String(
+                value ?? ""
+            ).replace(
+                /[&<>"']/g,
+                function (character) {
+
+                    const entities = {
+
+                        "&": "&amp;",
+                        "<": "&lt;",
+                        ">": "&gt;",
+                        '"': "&quot;",
+                        "'": "&#039;"
+
+                    };
+
+                    return entities[character];
+
+                }
+            );
+
+        }
+
+
+
+        /*
+         * Load services
+         */
+
+        async function loadServices() {
+
+
+            status.textContent =
+                "Loading services...";
+
+
+            serviceList.innerHTML =
+                "";
+
+
+            /*
+             * Create search query
+             */
+
+            const query =
+                new URLSearchParams();
+
+
+            if (
+                serviceSearch.value.trim()
+            ) {
+
+                query.set(
+                    "search",
+                    serviceSearch.value.trim()
+                );
+
+            }
+
+
+            if (
+                serviceLocation.value.trim()
+            ) {
+
+                query.set(
+                    "location",
+                    serviceLocation.value.trim()
+                );
+
+            }
+
+
+            if (serviceType.value) {
+
+                query.set(
+                    "type",
+                    serviceType.value
+                );
+
+            }
+
+
+
+            /*
+             * API URL
+             */
+
+            const apiUrl =
+                API_BASE +
+                "/api/services/?" +
+                query.toString();
+
+
+            console.log(
+                "Requesting:",
+                apiUrl
+            );
+
+
+
+            try {
+
+
+                /*
+                 * Call Django API
+                 */
+
+                const response =
+                    await fetch(apiUrl);
+
+
+                /*
+                 * Check response
+                 */
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "API returned status " +
+                        response.status
+                    );
+
+                }
+
+
+                /*
+                 * Convert to JSON
+                 */
+
+                const services =
+                    await response.json();
+
+
+                console.log(
+                    "Services received:",
+                    services
+                );
+
+
+                /*
+                 * Make sure response is an array
+                 */
+
+                if (
+                    !Array.isArray(services)
+                ) {
+
+                    throw new Error(
+                        "Invalid API response"
+                    );
+
+                }
+
+
+                /*
+                 * Result count
+                 */
+
+                status.textContent =
+                    services.length +
+                    " service listing(s) found.";
+
+
+                /*
+                 * No services
+                 */
+
+                if (
+                    services.length === 0
+                ) {
+
+                    serviceList.innerHTML = `
+
+                        <div class="card">
+
+                            <h2>
+                                No listings found
+                            </h2>
+
+                            <p>
+                                Try another keyword,
+                                service type or location.
+                            </p>
+
+                        </div>
+
+                    `;
+
+                    return;
+
+                }
+
+
+
+                /*
+                 * Display services
+                 */
+
+                serviceList.innerHTML =
+                    services.map(
+                        function (service) {
+
+                            return `
+
+                                <article class="card">
+
+                                    <span class="tag">
+                                        ${esc(
+                                            service.service_type
+                                        )}
+                                    </span>
+
+
+                                    <h2>
+                                        ${esc(
+                                            service.name
+                                        )}
+                                    </h2>
+
+
+                                    <p>
+
+                                        <b>
+                                            Location:
+                                        </b>
+
+                                        ${esc(
+                                            service.location
+                                        )}
+
+                                    </p>
+
+
+                                    <p>
+                                        ${esc(
+                                            service.description
+                                        )}
+                                    </p>
+
+
+                                    ${
+                                        service.price_from
+
+                                        ? `
+
+                                            <p>
+
+                                                <b>
+                                                    Price:
+                                                </b>
+
+                                                From
+                                                ${esc(
+                                                    service.price_from
+                                                )}
+
+                                            </p>
+
+                                          `
+
+                                        : ""
+                                    }
+
+
+                                    ${
+                                        service.phone
+
+                                        ? `
+
+                                            <p>
+
+                                                <b>
+                                                    Phone:
+                                                </b>
+
+                                                ${esc(
+                                                    service.phone
+                                                )}
+
+                                            </p>
+
+                                          `
+
+                                        : ""
+                                    }
+
+
+                                    ${
+                                        service.website
+
+                                        ? `
+
+                                            <a
+                                                class="button"
+                                                href="${esc(
+                                                    service.website
+                                                )}"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                Website
+                                            </a>
+
+                                          `
+
+                                        : ""
+                                    }
+
+                                </article>
+
+                            `;
+
+                        }
+                    ).join("");
+
+
+            }
+
+
+            catch (error) {
+
+
+                console.error(
+                    "Unable to load services:",
+                    error
+                );
+
+
+                status.textContent =
+                    "Unable to load services.";
+
+
+                serviceList.innerHTML = `
+
+                    <div class="card">
+
+                        <h2>
+                            Backend API unavailable
+                        </h2>
+
+                        <p>
+                            Please make sure the Django
+                            server is running.
+                        </p>
+
+                        <p>
+
+                            Backend:
+
+                            <strong>
+                                http://127.0.0.1:8000
+                            </strong>
+
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+
+
+        /*
+         * Search button
+         */
+
+        serviceForm.addEventListener(
+            "submit",
+            function (event) {
+
+                event.preventDefault();
+
+                loadServices();
+
+            }
+        );
+
+
+
+        /*
+         * Load services when page opens
+         */
+
+        loadServices();
+
+
+    </script>
+
+
+</body>
+
+</html>

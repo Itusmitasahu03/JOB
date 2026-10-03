@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Online Jobs, Nearby Jobs, Work From Home | Bond Desk</title>
+
+    <meta name="description"
+        content="Search Bond Desk for online jobs, nearby jobs, work from home, part time jobs and full time jobs by keyword and location.">
+
+    <meta name="robots" content="index,follow">
+
+    <link rel="canonical" href="https://bonddesk.netlify.app/jobs.html">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav>
+        <a class="logo" href="index.html">Bond_Desk</a>
+
+        <div class="navlinks">
+            <a href="index.html">Home</a>
+            <a href="spa.html">Spa Centre</a>
+            <a href="jobs.html">Jobs</a>
+        </div>
+    </nav>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="container page">
+
+        <h1>
+            Jobs: Online, Nearby, Work From Home, Part Time & Full Time
+        </h1>
+
+        <p class="lead">
+            Search location-wise job listings from the Bond Desk database.
+        </p>
+
+
+        <!-- ================= SEARCH FORM ================= -->
+
+        <form id="jobForm" class="searchbox light">
+
+            <input
+                id="jobSearch"
+                type="text"
+                placeholder="Job title, skill or company"
+            >
+
+            <input
+                id="jobLocation"
+                type="text"
+                placeholder="Location"
+            >
+
+            <select id="jobType">
+
+                <option value="">
+                    All job types
+                </option>
+
+                <option value="Online Job">
+                    Online Job
+                </option>
+
+                <option value="Nearby Job">
+                    Nearby Job
+                </option>
+
+                <option value="Work From Home">
+                    Work From Home
+                </option>
+
+                <option value="Part Time Job">
+                    Part Time Job
+                </option>
+
+                <option value="Full Time Job">
+                    Full Time Job
+                </option>
+
+            </select>
+
+            <button type="submit">
+                Search Jobs
+            </button>
+
+        </form>
+
+
+        <!-- ================= STATUS ================= -->
+
+        <div id="status" class="status">
+            Loading jobs...
+        </div>
+
+
+        <!-- ================= JOB LIST ================= -->
+
+        <div id="jobList" class="list"></div>
+
+    </main>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script>
+
+        /*
+         * LOCAL DJANGO BACKEND
+         *
+         * Django server:
+         * http://127.0.0.1:8000/
+         */
+
+        const API_BASE = "http://127.0.0.1:8000";
+
+
+        /*
+         * Get HTML elements
+         */
+
+        const jobForm = document.getElementById("jobForm");
+        const jobSearch = document.getElementById("jobSearch");
+        const jobLocation = document.getElementById("jobLocation");
+        const jobType = document.getElementById("jobType");
+        const status = document.getElementById("status");
+        const jobList = document.getElementById("jobList");
+
+
+        /*
+         * Read search parameters from URL
+         *
+         * Example:
+         * jobs.html?search=python&location=Bhubaneswar
+         */
+
+        const params = new URLSearchParams(window.location.search);
+
+        jobSearch.value = params.get("search") || "";
+        jobLocation.value = params.get("location") || "";
+        jobType.value = params.get("type") || "";
+
+
+        /*
+         * Escape HTML
+         *
+         * This prevents database text from being
+         * inserted directly as HTML.
+         */
+
+        function esc(value) {
+
+            return String(value ?? "").replace(
+                /[&<>"']/g,
+
+                function (character) {
+
+                    const entities = {
+                        "&": "&amp;",
+                        "<": "&lt;",
+                        ">": "&gt;",
+                        '"': "&quot;",
+                        "'": "&#039;"
+                    };
+
+                    return entities[character];
+
+                }
+            );
+
+        }
+
+
+        /*
+         * Load jobs from Django API
+         */
+
+        async function loadJobs() {
+
+            status.textContent = "Loading jobs...";
+
+            jobList.innerHTML = "";
+
+
+            /*
+             * Create API query
+             */
+
+            const query = new URLSearchParams();
+
+
+            if (jobSearch.value.trim()) {
+
+                query.set(
+                    "search",
+                    jobSearch.value.trim()
+                );
+
+            }
+
+
+            if (jobLocation.value.trim()) {
+
+                query.set(
+                    "location",
+                    jobLocation.value.trim()
+                );
+
+            }
+
+
+            if (jobType.value) {
+
+                query.set(
+                    "type",
+                    jobType.value
+                );
+
+            }
+
+
+            /*
+             * Build API URL
+             */
+
+            const apiUrl =
+                API_BASE +
+                "/api/jobs/?" +
+                query.toString();
+
+
+            console.log("Requesting:", apiUrl);
+
+
+            try {
+
+                /*
+                 * Request jobs from Django
+                 */
+
+                const response = await fetch(apiUrl);
+
+
+                /*
+                 * Check HTTP status
+                 */
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "API returned status " +
+                        response.status
+                    );
+
+                }
+
+
+                /*
+                 * Convert response to JSON
+                 */
+
+                const jobs = await response.json();
+
+
+                console.log("Jobs received:", jobs);
+
+
+                /*
+                 * Check that API returned an array
+                 */
+
+                if (!Array.isArray(jobs)) {
+
+                    throw new Error(
+                        "Invalid API response"
+                    );
+
+                }
+
+
+                /*
+                 * Show result count
+                 */
+
+                status.textContent =
+                    jobs.length +
+                    " job listing(s) found.";
+
+
+                /*
+                 * No jobs
+                 */
+
+                if (jobs.length === 0) {
+
+                    jobList.innerHTML = `
+                        <div class="card">
+
+                            <h2>No jobs found</h2>
+
+                            <p>
+                                Try another keyword,
+                                location or job type.
+                            </p>
+
+                        </div>
+                    `;
+
+                    return;
+
+                }
+
+
+                /*
+                 * Display jobs
+                 */
+
+                jobList.innerHTML = jobs.map(function (job) {
+
+                    return `
+
+                        <article class="job card">
+
+                            <div>
+
+                                <!-- Job type -->
+
+                                <span class="tag">
+                                    ${esc(job.job_type)}
+                                </span>
+
+
+                                <!-- Job title -->
+
+                                <h2>
+                                    ${esc(job.title)}
+                                </h2>
+
+
+                                <!-- Company + Location -->
+
+                                <p>
+                                    <strong>
+                                        ${esc(job.company)}
+                                    </strong>
+
+                                    ·
+
+                                    ${esc(job.location)}
+                                </p>
+
+
+                                <!-- Description -->
+
+                                <p>
+                                    ${esc(job.description)}
+                                </p>
+
+
+                                <!-- Work + Salary -->
+
+                                <p>
+
+                                    <b>Work:</b>
+
+                                    ${esc(
+                                        job.work_mode ||
+                                        "Not specified"
+                                    )}
+
+                                    &nbsp;&nbsp;
+
+                                    <b>Salary:</b>
+
+                                    ${esc(
+                                        job.salary ||
+                                        "Not specified"
+                                    )}
+
+                                </p>
+
+
+                                <!-- Skills -->
+
+                                <p>
+
+                                    <b>Skills:</b>
+
+                                    ${esc(
+                                        job.skills ||
+                                        "Not specified"
+                                    )}
+
+                                </p>
+
+
+                                <!-- Posted date -->
+
+                                <p>
+
+                                    <b>Posted:</b>
+
+                                    ${esc(
+                                        job.created_at ||
+                                        "Not specified"
+                                    )}
+
+                                </p>
+
+                            </div>
+
+
+                            <!-- Apply button -->
+
+                            ${
+                                job.application_link
+
+                                    ? `
+
+                                        <a
+                                            class="button"
+                                            href="${esc(job.application_link)}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            Apply
+                                        </a>
+
+                                      `
+
+                                    : ""
+                            }
+
+                        </article>
+
+                    `;
+
+                }).join("");
+
+
+            }
+
+            catch (error) {
+
+                /*
+                 * Show error
+                 */
+
+                console.error(
+                    "Unable to load jobs:",
+                    error
+                );
+
+
+                status.textContent =
+                    "Unable to load jobs. Please try again.";
+
+
+                jobList.innerHTML = `
+
+                    <div class="card">
+
+                        <h2>
+                            Backend API unavailable
+                        </h2>
+
+                        <p>
+                            Please make sure the Django
+                            server is running.
+                        </p>
+
+                        <p>
+                            Backend:
+                            <strong>
+                                http://127.0.0.1:8000
+                            </strong>
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+
+        /*
+         * Search button
+         */
+
+        jobForm.addEventListener(
+            "submit",
+            function (event) {
+
+                event.preventDefault();
+
+                loadJobs();
+
+            }
+        );
+
+
+        /*
+         * Load jobs automatically
+         * when page opens.
+         */
+
+        loadJobs();
+
+    </script>
+
+</body>
+
+</html>

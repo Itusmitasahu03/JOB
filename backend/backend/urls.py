@@ -1,4 +1,3 @@
-
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -23,9 +22,18 @@ def robots(request):
     )
 
 
+def sitemap(request):
+    file_path = Path(settings.BASE_DIR).parent / "sitemap.xml"
+    return FileResponse(
+        open(file_path, "rb"),
+        content_type="application/xml"
+    )
+
+
 urlpatterns = [
     path("", home, name="home"),
     path("robots.txt", robots, name="robots"),
+    path("sitemap.xml", sitemap, name="sitemap"),
     path("admin/", admin.site.urls),
     path("api/", include("hotel.urls")),
     path("jobs/", views.jobs_page, name="jobs_page"),
@@ -38,4 +46,3 @@ if settings.DEBUG:
         settings.STATIC_URL,
         document_root=settings.BASE_DIR / "static"
     )
-
